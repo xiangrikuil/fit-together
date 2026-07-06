@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
 import { roomIdSchema } from "@/features/checkins/checkin-validation";
+import { canUploadWithVercelBlob } from "@/features/members/blob-upload-config";
 import { avatarUploadRequestSchema } from "@/features/members/member-validation";
 
 const allowedAvatarTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -12,9 +13,9 @@ export async function POST(
   request: Request,
   context: { params: Promise<{ roomId: string }> },
 ) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!canUploadWithVercelBlob(process.env)) {
     return NextResponse.json(
-      { error: "BLOB_READ_WRITE_TOKEN is not configured." },
+      { error: "Vercel Blob upload credentials are not configured." },
       { status: 503 },
     );
   }
