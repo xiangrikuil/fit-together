@@ -7,7 +7,10 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { STATUS_LABELS } from "@/components/checkins/labels";
 import { ParticipantAvatar } from "./member-avatar";
-import { statusDotClassName, statusPillClassName } from "./status-styles";
+import {
+  checkinPanelClassName,
+  statusDotClassName,
+} from "./status-styles";
 
 type MonthlyCalendarProps = {
   dashboard: MonthlyDashboard;
@@ -31,7 +34,7 @@ export const MonthlyCalendar = ({
   const leadingEmptyCells = getMondayStartOffset(dashboard.dates[0]);
 
   return (
-    <section className="rounded-lg border bg-card/90 p-4 shadow-sm">
+    <section className={checkinPanelClassName}>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 text-base font-semibold">
@@ -105,14 +108,17 @@ const DayCell = ({
 }) => (
   <div
     className={cn(
-      "min-h-20 rounded-md border bg-background/75 p-1 text-left transition-colors sm:min-h-24 sm:p-1.5",
-      date === today && "border-primary ring-2 ring-primary/15",
+      "min-h-[4.25rem] rounded-md border border-foreground/5 bg-background/35 p-1 text-left transition-colors sm:min-h-24 sm:p-1.5",
+      date === today && "border-primary/50 bg-primary/5 ring-2 ring-primary/15",
     )}
+    aria-label={`${date}，A ${STATUS_LABELS[statuses.A]}，B ${STATUS_LABELS[statuses.B]}`}
   >
-    <div className="mb-2 text-xs font-semibold">{Number(date.slice(8, 10))}</div>
-    <div className="space-y-1">
+    <div className="mb-1.5 text-xs font-semibold tabular-nums">
+      {Number(date.slice(8, 10))}
+    </div>
+    <div className="space-y-0.5">
       {(["A", "B"] as const).map((participant) => (
-        <StatusPill
+        <CompactStatus
           key={participant}
           participant={participant}
           profiles={profiles}
@@ -123,7 +129,7 @@ const DayCell = ({
   </div>
 );
 
-const StatusPill = ({
+const CompactStatus = ({
   participant,
   profiles,
   status,
@@ -134,8 +140,8 @@ const StatusPill = ({
 }) => (
   <div
     className={cn(
-      "flex items-center gap-1 rounded px-1 py-1 text-[10px] font-medium sm:justify-between sm:px-1.5 sm:text-[11px]",
-      statusPillClassName[status],
+      "flex h-5 items-center gap-1 rounded-sm px-0.5 text-[10px] text-muted-foreground sm:h-6 sm:bg-card/55 sm:px-1 sm:text-[11px]",
+      status === "future" && "opacity-60",
     )}
     title={`${profiles[participant].displayName}: ${STATUS_LABELS[status]}`}
   >
@@ -144,7 +150,7 @@ const StatusPill = ({
       profiles={profiles}
       className="size-4 rounded-sm border-0 text-[9px] shadow-none"
     />
-    <span className={cn("size-1.5 rounded-full sm:hidden", statusDotClassName[status])} />
+    <span className={cn("size-1.5 rounded-full", statusDotClassName[status])} />
     <span className="hidden sm:inline">{STATUS_LABELS[status]}</span>
   </div>
 );

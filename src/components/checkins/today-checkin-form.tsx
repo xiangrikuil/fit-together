@@ -11,13 +11,15 @@ import {
 } from "@/domain/checkins";
 import { CheckinView } from "@/features/checkins/checkin-repository";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   CHECKIN_STATUS_LABELS,
   WORKOUT_TYPE_LABELS,
 } from "@/components/checkins/labels";
+import { checkinPanelClassName } from "@/components/checkins/status-styles";
+import { DurationStepperControl } from "@/components/checkins/duration-stepper-control";
+import { normalizeDurationMinutes } from "@/features/checkins/duration-stepper";
 
 type TodayCheckinFormProps = {
   roomId: string;
@@ -41,7 +43,7 @@ export const TodayCheckinForm = ({
     record?.workoutType ?? "strength",
   );
   const [durationMinutes, setDurationMinutes] = useState(
-    String(record?.durationMinutes ?? 30),
+    normalizeDurationMinutes(record?.durationMinutes),
   );
   const [note, setNote] = useState(record?.note ?? "");
   const [message, setMessage] = useState("");
@@ -72,8 +74,7 @@ export const TodayCheckinForm = ({
             participant: selectedParticipant,
             status,
             workoutType: status === "done" ? workoutType : null,
-            durationMinutes:
-              status === "done" ? Number(durationMinutes || "0") : null,
+            durationMinutes: status === "done" ? durationMinutes : null,
             note,
           }),
         },
@@ -96,7 +97,7 @@ export const TodayCheckinForm = ({
   };
 
   return (
-    <section className="rounded-lg border bg-card/90 p-4 shadow-sm">
+    <section className={checkinPanelClassName}>
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 text-base font-semibold">
@@ -120,8 +121,9 @@ export const TodayCheckinForm = ({
             <Button
               key={value}
               type="button"
-              variant={status === value ? "default" : "outline"}
-              className="h-10"
+              variant={status === value ? "secondary" : "outline"}
+              className="h-10 data-[active=true]:border-primary/20 data-[active=true]:text-primary"
+              data-active={status === value}
               onClick={() => setStatus(value)}
               disabled={!selectedParticipant || disabled}
             >
@@ -154,18 +156,11 @@ export const TodayCheckinForm = ({
               ))}
             </select>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="duration">时长</Label>
-            <Input
-              id="duration"
-              type="number"
-              min={0}
-              max={1440}
-              value={durationMinutes}
-              onChange={(event) => setDurationMinutes(event.target.value)}
-              disabled={status === "rest" || !selectedParticipant || disabled}
-            />
-          </div>
+          <DurationStepperControl
+            value={durationMinutes}
+            disabled={status === "rest" || !selectedParticipant || disabled}
+            onChange={setDurationMinutes}
+          />
         </div>
 
         <div className="space-y-2">

@@ -10,7 +10,10 @@ import type { MemberProfile } from "@/domain/members";
 import { cn } from "@/lib/utils";
 import { STATUS_LABELS } from "./labels";
 import { ParticipantAvatar } from "./member-avatar";
-import { statusDotClassName } from "./status-styles";
+import {
+  checkinPanelClassName,
+  statusDotClassName,
+} from "./status-styles";
 
 type RecentOverviewProps = {
   dashboard: MonthlyDashboard;
@@ -24,7 +27,7 @@ export const RecentOverview = ({
   const dates = getRecentDashboardDates(dashboard);
 
   return (
-    <section className="rounded-lg border bg-card/90 p-4 shadow-sm">
+    <section className={checkinPanelClassName}>
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="flex items-center gap-2 text-base font-semibold">
@@ -36,11 +39,12 @@ export const RecentOverview = ({
       </div>
 
       {dates.length > 0 ? (
-        <div className="grid grid-cols-7 gap-1">
-          {dates.map((date) => (
+        <div className="overflow-hidden rounded-lg border border-foreground/5 bg-background/35">
+          {dates.map((date, index) => (
             <RecentDay
               key={date}
               date={date}
+              isLast={index === dates.length - 1}
               profiles={profiles}
               statuses={dashboard.days[date]}
             />
@@ -57,39 +61,59 @@ export const RecentOverview = ({
 
 const RecentDay = ({
   date,
+  isLast,
   profiles,
   statuses,
 }: {
   date: string;
+  isLast: boolean;
   profiles: Record<Participant, MemberProfile>;
   statuses: Record<Participant, CalendarStatus>;
 }) => (
-  <div className="min-w-0 rounded-md border bg-background/70 p-1.5 text-center">
-    <div className="mb-2 text-[10px] font-semibold leading-none text-muted-foreground">
-      {Number(date.slice(8, 10))}
+  <div
+    className={cn(
+      "grid grid-cols-[2.5rem_1fr] items-center gap-2 px-2 py-2",
+      !isLast && "border-b border-foreground/5",
+    )}
+  >
+    <div className="text-center">
+      <div className="text-sm font-bold leading-none tabular-nums">
+        {Number(date.slice(8, 10))}
+      </div>
+      <div className="mt-0.5 text-[10px] text-muted-foreground">日</div>
     </div>
-    <div className="space-y-1">
+    <div className="grid min-w-0 grid-cols-2 gap-2">
       {(["A", "B"] as const).map((participant) => (
-        <div
+        <RecentParticipantStatus
           key={participant}
-          className="flex items-center justify-center gap-1"
-          title={`${profiles[participant].displayName}: ${
-            STATUS_LABELS[statuses[participant]]
-          }`}
-        >
-          <ParticipantAvatar
-            participant={participant}
-            profiles={profiles}
-            className="size-4 rounded-sm border-0 text-[8px] shadow-none"
-          />
-          <span
-            className={cn(
-              "size-1.5 rounded-full",
-              statusDotClassName[statuses[participant]],
-            )}
-          />
-        </div>
+          participant={participant}
+          profiles={profiles}
+          status={statuses[participant]}
+        />
       ))}
     </div>
+  </div>
+);
+
+const RecentParticipantStatus = ({
+  participant,
+  profiles,
+  status,
+}: {
+  participant: Participant;
+  profiles: Record<Participant, MemberProfile>;
+  status: CalendarStatus;
+}) => (
+  <div
+    className="flex h-7 min-w-0 items-center gap-1.5 rounded-md bg-card/55 px-1.5 text-xs text-muted-foreground"
+    title={`${profiles[participant].displayName}: ${STATUS_LABELS[status]}`}
+  >
+    <ParticipantAvatar
+      participant={participant}
+      profiles={profiles}
+      className="size-5 rounded-sm border-0 text-[9px] shadow-none"
+    />
+    <span className={cn("size-1.5 rounded-full", statusDotClassName[status])} />
+    <span className="min-w-0 truncate">{STATUS_LABELS[status]}</span>
   </div>
 );

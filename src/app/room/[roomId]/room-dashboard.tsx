@@ -42,6 +42,7 @@ export const RoomDashboard = ({
   const router = useRouter();
   const currentMonth = today.slice(0, 7);
   const selectedParticipant = useRoomParticipant(roomId);
+  const headerDate = today.slice(5).replace("-", ".");
   const [activeTab, setActiveTab] = useState<RoomTab>(
     month === currentMonth ? "today" : "overview",
   );
@@ -80,12 +81,12 @@ export const RoomDashboard = ({
       }),
     [currentMonth, records, today],
   );
-
+  const todayRecords = useMemo(
+    () => getTodayRecords(records, today),
+    [records, today],
+  );
   const todayRecord = selectedParticipant
-    ? records.find(
-        (record) =>
-          record.participant === selectedParticipant && record.dateCn === today,
-      ) ?? null
+    ? todayRecords[selectedParticipant] ?? null
     : null;
 
   const handleSelectParticipant = (participant: Participant) => {
@@ -113,25 +114,33 @@ export const RoomDashboard = ({
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,color-mix(in_oklch,var(--primary),transparent_84%),transparent_30rem),linear-gradient(180deg,var(--background),color-mix(in_oklch,var(--muted),var(--background)_72%))] px-3 pt-4 pb-28 text-foreground sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_20%_0%,color-mix(in_oklch,var(--primary),transparent_82%),transparent_28rem),radial-gradient(circle_at_82%_100%,color-mix(in_oklch,var(--destructive),transparent_88%),transparent_30rem),var(--background)] px-3 pt-5 pb-32 text-foreground sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
-        <header className="flex items-center justify-between gap-3 px-1">
+        <header className="flex items-start justify-between gap-3 px-1 py-1">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
-              Fit Together
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">
+              FIT TOGETHER
             </p>
-            <h1 className="mt-1 truncate text-xl font-semibold tracking-tight sm:text-2xl">
-              房间 {roomId}
+            <h1 className="mt-1 text-2xl font-black tracking-tight sm:text-3xl">
+              今天也一起练吧
             </h1>
+            <div className="mt-2 inline-flex max-w-full rounded-full border border-foreground/10 bg-card/75 px-3 py-1 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur">
+              <span className="truncate">房间 {roomId}</span>
+            </div>
           </div>
-          <div className="shrink-0 rounded-md border bg-card/80 px-3 py-2 text-right text-xs shadow-sm">
+          <div className="shrink-0 rounded-lg border border-foreground/10 bg-card/80 px-3 py-2 text-right shadow-sm backdrop-blur">
             <p className="text-muted-foreground">中国时间</p>
-            <p className="font-semibold text-primary">{today}</p>
+            <p className="text-lg font-black leading-tight text-primary">
+              {headerDate}
+            </p>
+            <p className="text-[10px] text-muted-foreground">
+              {today.slice(0, 4)}
+            </p>
           </div>
         </header>
 
         {!databaseConfigured || databaseError ? (
-          <section className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-100">
+          <section className="rounded-lg border border-amber-300/70 bg-amber-50/85 p-4 text-sm text-amber-950 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-100">
             {databaseError ??
               "还没有配置 DATABASE_URL。页面可以预览，但保存打卡需要 Neon Postgres 连接串。"}
           </section>
@@ -145,6 +154,7 @@ export const RoomDashboard = ({
             profiles={profiles}
             disabled={!databaseConfigured || Boolean(databaseError)}
             selectedParticipant={selectedParticipant}
+            todayRecords={todayRecords}
             todayRecord={todayRecord}
             onSelectParticipant={handleSelectParticipant}
             onProfileSaved={handleProfileSaved}
@@ -198,3 +208,15 @@ const mergeRecords = (
 
 const getRecordKey = (record: Pick<CheckinView, "participant" | "dateCn">) =>
   `${record.participant}:${record.dateCn}`;
+
+const getTodayRecords = (records: CheckinView[], today: string) => {
+  const todayRecords: Partial<Record<Participant, CheckinView>> = {};
+
+  for (const record of records) {
+    if (record.dateCn === today) {
+      todayRecords[record.participant] = record;
+    }
+  }
+
+  return todayRecords;
+};

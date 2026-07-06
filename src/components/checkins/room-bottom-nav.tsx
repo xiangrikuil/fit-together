@@ -30,8 +30,8 @@ export const RoomBottomNav = ({
   activeTab,
   onTabChange,
 }: RoomBottomNavProps) => (
-  <nav className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/90 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur">
-    <div className="mx-auto grid h-16 max-w-md grid-cols-3 gap-1 rounded-lg border bg-card p-1 shadow-lg">
+  <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-foreground/10 bg-background/75 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl">
+    <div className="mx-auto grid h-16 max-w-md grid-cols-3 gap-1 rounded-lg border border-foreground/10 bg-card/85 p-1.5 shadow-[0_12px_32px_rgb(15_23_42_/_0.12)]">
       {tabs.map(({ value, label, Icon }) => {
         const isActive = activeTab === value;
 
@@ -43,8 +43,8 @@ export const RoomBottomNav = ({
             className={cn(
               "flex min-w-0 flex-col items-center justify-center gap-1 rounded-md px-2 text-xs font-medium transition-colors",
               isActive
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                ? "bg-primary/10 text-primary ring-1 ring-primary/10"
+                : "text-muted-foreground hover:bg-muted/80 hover:text-foreground",
             )}
             onClick={() => onTabChange(value)}
           >

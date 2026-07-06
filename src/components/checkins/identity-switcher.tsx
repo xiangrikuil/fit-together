@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { MemberAvatar, avatarColorClassName } from "./member-avatar";
+import { checkinPanelClassName } from "./status-styles";
 
 type IdentitySwitcherProps = {
   roomId: string;
@@ -34,15 +35,11 @@ export const IdentitySwitcher = ({
   const selectedProfile = selected ? profiles[selected] : null;
 
   return (
-    <section className="rounded-lg border bg-card/90 p-4 shadow-sm">
-      <div className="mb-3 flex items-center justify-between gap-3">
+    <section className={checkinPanelClassName}>
+      <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-sm font-semibold tracking-wide text-foreground">
-            当前身份
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            身份保存在本机，资料保存在房间
-          </p>
+          <h2 className="text-base font-semibold">我的设置</h2>
+          <p className="text-sm text-muted-foreground">当前身份与房间资料</p>
         </div>
         {selected ? (
           <Badge variant="outline" className="gap-1 border-primary/30">
@@ -51,26 +48,35 @@ export const IdentitySwitcher = ({
           </Badge>
         ) : null}
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        {(["A", "B"] as const).map((participant) => (
-          <Button
-            key={participant}
-            type="button"
-            variant={selected === participant ? "default" : "outline"}
-            size="lg"
-            className="h-auto justify-start gap-2 px-2 py-2"
-            onClick={() => onSelect(participant)}
-          >
-            <MemberAvatar
-              profile={profiles[participant]}
-              className="size-8 rounded-md"
-            />
-            <span className="min-w-0 flex-1 truncate text-left">
-              {profiles[participant].displayName}
-            </span>
-            {selected === participant ? <Check className="size-4" /> : null}
-          </Button>
-        ))}
+
+      <div className="space-y-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          当前身份
+        </h3>
+        <div className="grid grid-cols-2 gap-2">
+          {(["A", "B"] as const).map((participant) => (
+            <Button
+              key={participant}
+              type="button"
+              variant={selected === participant ? "secondary" : "outline"}
+              size="lg"
+              className={cn(
+                "h-auto justify-start gap-2 px-2 py-2",
+                selected === participant && "ring-1 ring-primary/20",
+              )}
+              onClick={() => onSelect(participant)}
+            >
+              <MemberAvatar
+                profile={profiles[participant]}
+                className="size-8 rounded-md"
+              />
+              <span className="min-w-0 flex-1 truncate text-left">
+                {profiles[participant].displayName}
+              </span>
+              {selected === participant ? <Check className="size-4" /> : null}
+            </Button>
+          ))}
+        </div>
       </div>
       {selectedProfile && showProfileForm ? (
         <MemberProfileForm
@@ -148,7 +154,11 @@ const MemberProfileForm = ({
       const payload = await response.json();
 
       if (!response.ok) {
-        setError(payload.error ?? "头像上传失败。");
+        setError(
+          response.status === 503
+            ? "头像上传暂未开启，可以先使用头像底色。"
+            : (payload.error ?? "头像上传失败。"),
+        );
         return;
       }
 
@@ -198,55 +208,68 @@ const MemberProfileForm = ({
   };
 
   return (
-    <form className="mt-4 space-y-3 border-t pt-4" onSubmit={handleSubmit}>
-      <div className="flex items-center gap-3">
-        <MemberAvatar profile={previewProfile} className="size-14" />
-        <div className="min-w-0 flex-1">
-          <Label htmlFor="display-name">昵称</Label>
+    <form className="mt-4 space-y-4 border-t pt-4" onSubmit={handleSubmit}>
+      <div className="space-y-3">
+        <div>
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            个人资料
+          </h3>
+        </div>
+        <div className="flex items-center gap-3">
+          <MemberAvatar profile={previewProfile} className="size-14" />
+          <div className="min-w-0 flex-1">
+            <Label htmlFor="display-name">昵称</Label>
+            <Input
+              id="display-name"
+              value={displayName}
+              maxLength={24}
+              disabled={disabled}
+              onChange={(event) => setDisplayName(event.target.value)}
+              className="mt-2"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-3 border-t pt-4">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          头像设置
+        </h3>
+
+        <div className="space-y-2">
+          <Label>头像底色</Label>
+          <div className="grid grid-cols-4 gap-2">
+            {AVATAR_COLORS.map((color) => (
+              <Button
+                key={color}
+                type="button"
+                variant="outline"
+                size="icon"
+                disabled={disabled}
+                className={cn(
+                  "h-8 w-full",
+                  avatarColorClassName[color],
+                  avatarColor === color && "ring-2 ring-primary",
+                )}
+                onClick={() => setAvatarColor(color)}
+                title={`选择 ${color} 底色`}
+              >
+                {avatarColor === color ? <Check className="size-4" /> : null}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="grid gap-2">
+          <Label htmlFor="avatar-file">上传头像</Label>
           <Input
-            id="display-name"
-            value={displayName}
-            maxLength={24}
-            disabled={disabled}
-            onChange={(event) => setDisplayName(event.target.value)}
-            className="mt-2"
+            id="avatar-file"
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            disabled={disabled || isUploading}
+            onChange={handleAvatarChange}
           />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label>头像底色</Label>
-        <div className="grid grid-cols-4 gap-2">
-          {AVATAR_COLORS.map((color) => (
-            <Button
-              key={color}
-              type="button"
-              variant="outline"
-              size="icon"
-              disabled={disabled}
-              className={cn(
-                "h-8 w-full",
-                avatarColorClassName[color],
-                avatarColor === color && "ring-2 ring-primary",
-              )}
-              onClick={() => setAvatarColor(color)}
-              title={`选择 ${color} 底色`}
-            >
-              {avatarColor === color ? <Check className="size-4" /> : null}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-2">
-        <Label htmlFor="avatar-file">上传头像</Label>
-        <Input
-          id="avatar-file"
-          type="file"
-          accept="image/png,image/jpeg,image/webp"
-          disabled={disabled || isUploading}
-          onChange={handleAvatarChange}
-        />
       </div>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -262,7 +285,7 @@ const MemberProfileForm = ({
       </Button>
       <p className="flex items-center gap-1 text-xs text-muted-foreground">
         <Camera className="size-3" />
-        上传头像需要配置 Vercel Blob Token
+        头像可选，未开启上传时可先使用头像底色
       </p>
     </form>
   );

@@ -6,7 +6,7 @@ export const PARTICIPANT_LABELS = {
 } as const;
 
 export const STATUS_LABELS: Record<CalendarStatus, string> = {
-  done: "已练",
+  done: "已训练",
   rest: "休息",
   missed: "缺卡",
   future: "未到",

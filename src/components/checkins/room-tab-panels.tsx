@@ -1,6 +1,7 @@
 import type { MonthlyDashboard, Participant } from "@/domain/checkins";
 import type { MemberProfile } from "@/domain/members";
 import type { CheckinView } from "@/features/checkins/checkin-repository";
+import { CurrentIdentityStrip } from "@/components/checkins/current-identity-strip";
 import { IdentitySwitcher } from "@/components/checkins/identity-switcher";
 import { MonthlyCalendar } from "@/components/checkins/monthly-calendar";
 import { MonthlySummary } from "@/components/checkins/monthly-summary";
@@ -20,6 +21,7 @@ type RoomPanelSharedProps = {
 type TodayRoomPanelProps = RoomPanelSharedProps & {
   today: string;
   dashboard: MonthlyDashboard;
+  todayRecords: Partial<Record<Participant, CheckinView>>;
   todayRecord: CheckinView | null;
   onSaved: (record: CheckinView) => void;
 };
@@ -40,9 +42,9 @@ export const TodayRoomPanel = ({
   profiles,
   disabled,
   selectedParticipant,
+  todayRecords,
   todayRecord,
   onSelectParticipant,
-  onProfileSaved,
   onSaved,
 }: TodayRoomPanelProps) => (
   <section className="mx-auto w-full max-w-xl space-y-4">
@@ -51,15 +53,12 @@ export const TodayRoomPanel = ({
       today={today}
       profiles={profiles}
       selectedParticipant={selectedParticipant}
+      todayRecords={todayRecords}
     />
-    <IdentitySwitcher
-      roomId={roomId}
+    <CurrentIdentityStrip
       selected={selectedParticipant}
       profiles={profiles}
-      disabled={disabled}
-      showProfileForm={false}
       onSelect={onSelectParticipant}
-      onProfileSaved={onProfileSaved}
     />
     <TodayCheckinForm
       key={`${selectedParticipant ?? "none"}-${today}-${todayRecordKey(
