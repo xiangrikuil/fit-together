@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { CHECKIN_STATUSES, PARTICIPANTS, WORKOUT_TYPES } from "@/domain/checkins";
+import {
+  CHECKIN_STATUSES,
+  PARTICIPANTS,
+  WORKOUT_TYPES,
+} from "../../domain/checkins";
+import { DEFAULT_DURATION_MINUTES } from "./duration-stepper";
 
 export const roomIdSchema = z
   .string()
@@ -37,7 +42,7 @@ export const upsertCheckinSchema = z
     return {
       ...input,
       workoutType: input.workoutType ?? "strength",
-      durationMinutes: input.durationMinutes ?? 30,
+      durationMinutes: input.durationMinutes ?? DEFAULT_DURATION_MINUTES,
       note: input.note.trim(),
     };
   });
