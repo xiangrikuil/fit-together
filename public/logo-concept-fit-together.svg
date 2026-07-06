@@ -1,0 +1,27 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Fit Together logo concept</title>
+  <desc id="desc">A minimal logo concept combining a dumbbell bar with two check marks for a two-person fitness check-in app.</desc>
+  <rect width="1024" height="1024" fill="#FBF8EF"/>
+
+  <g transform="translate(512 398)">
+    <circle cx="0" cy="0" r="268" fill="#173B66"/>
+    <circle cx="0" cy="0" r="222" fill="#FBF8EF"/>
+
+    <path d="M-232 -8H232" stroke="#173B66" stroke-width="44" stroke-linecap="round"/>
+    <rect x="-310" y="-92" width="74" height="168" rx="32" fill="#173B66"/>
+    <rect x="-224" y="-72" width="48" height="128" rx="24" fill="#173B66"/>
+    <rect x="236" y="-92" width="74" height="168" rx="32" fill="#173B66"/>
+    <rect x="176" y="-72" width="48" height="128" rx="24" fill="#173B66"/>
+
+    <path d="M-146 -12L-54 80L142 -126" stroke="#34C99A" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M-134 -122L-42 -30L146 158" stroke="#4D7FE8" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <circle cx="-160" cy="146" r="34" fill="#34C99A"/>
+    <circle cx="160" cy="146" r="34" fill="#4D7FE8"/>
+  </g>
+
+  <g fill="#173B66">
+    <text x="512" y="773" text-anchor="middle" font-family="Avenir Next, PingFang SC, Inter, Arial, sans-serif" font-size="78" font-weight="700" letter-spacing="0">Fit Together</text>
+    <text x="512" y="838" text-anchor="middle" font-family="Avenir Next, PingFang SC, Inter, Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="8">TRAIN · CHECK IN · TOGETHER</text>
+  </g>
+</svg>
