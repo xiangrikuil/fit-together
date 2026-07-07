@@ -72,6 +72,56 @@ export const getRecentDashboardDates = (
   limit = 7,
 ) => dashboard.elapsedDates.slice(-limit);
 
+export const getRecentCheckinActivity = <
+  RecordType extends Pick<CheckinRecord, "dateCn" | "participant"> & {
+    createdAt?: string | Date | null;
+  },
+>(
+  records: RecordType[],
+  limit = 20,
+) =>
+  [...records]
+    .sort(compareCheckinActivity)
+    .slice(0, limit);
+
+const compareCheckinActivity = <
+  RecordType extends Pick<CheckinRecord, "dateCn" | "participant"> & {
+    createdAt?: string | Date | null;
+  },
+>(
+  left: RecordType,
+  right: RecordType,
+) => {
+  const dateOrder = right.dateCn.localeCompare(left.dateCn);
+
+  if (dateOrder !== 0) {
+    return dateOrder;
+  }
+
+  const leftCreatedAt = toTimestamp(left.createdAt);
+  const rightCreatedAt = toTimestamp(right.createdAt);
+
+  if (leftCreatedAt !== null && rightCreatedAt !== null) {
+    const timeOrder = rightCreatedAt - leftCreatedAt;
+
+    if (timeOrder !== 0) {
+      return timeOrder;
+    }
+  }
+
+  return left.participant.localeCompare(right.participant);
+};
+
+const toTimestamp = (value: string | Date | null | undefined) => {
+  if (!value) {
+    return null;
+  }
+
+  const timestamp = new Date(value).getTime();
+
+  return Number.isFinite(timestamp) ? timestamp : null;
+};
+
 export const buildMonthlyDashboard = ({
   month,
   today,

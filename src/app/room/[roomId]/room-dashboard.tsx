@@ -7,6 +7,7 @@ import { MemberProfile, getDefaultMemberProfiles } from "@/domain/members";
 import type { CheckinView } from "@/features/checkins/checkin-repository";
 import { RoomBottomNav, type RoomTab } from "@/components/checkins/room-bottom-nav";
 import {
+  ActivityRoomPanel,
   MeRoomPanel,
   OverviewRoomPanel,
   TodayRoomPanel,
@@ -114,8 +115,8 @@ export const RoomDashboard = ({
   };
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_20%_0%,color-mix(in_oklch,var(--primary),transparent_82%),transparent_28rem),radial-gradient(circle_at_82%_100%,color-mix(in_oklch,var(--destructive),transparent_88%),transparent_30rem),var(--background)] px-3 pt-5 pb-32 text-foreground sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
+    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_20%_0%,color-mix(in_oklch,var(--primary),transparent_82%),transparent_28rem),radial-gradient(circle_at_82%_100%,color-mix(in_oklch,var(--destructive),transparent_88%),transparent_30rem),var(--background)] px-3 pt-5 pb-32 text-foreground sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-4">
         <header className="flex items-start justify-between gap-3 px-1 py-1">
           <div className="min-w-0">
             <p className="text-xs font-bold uppercase tracking-[0.28em] text-primary">
@@ -140,7 +141,7 @@ export const RoomDashboard = ({
         </header>
 
         {!databaseConfigured || databaseError ? (
-          <section className="rounded-lg border border-amber-300/70 bg-amber-50/85 p-4 text-sm text-amber-950 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-100">
+          <section className="break-all rounded-lg border border-amber-300/70 bg-amber-50/85 p-4 text-sm text-amber-950 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-100">
             {databaseError ??
               "还没有配置 DATABASE_URL。页面可以预览，但保存打卡需要 Neon Postgres 连接串。"}
           </section>
@@ -171,6 +172,10 @@ export const RoomDashboard = ({
             nextMonth={nextMonth}
             profiles={profiles}
           />
+        ) : null}
+
+        {activeTab === "activity" ? (
+          <ActivityRoomPanel today={today} records={records} profiles={profiles} />
         ) : null}
 
         {activeTab === "me" ? (

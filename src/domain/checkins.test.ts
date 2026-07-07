@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import {
   buildMonthlyDashboard,
   formatChinaDate,
+  getRecentCheckinActivity,
   getMonthDates,
 } from "./checkins";
 import * as checkins from "./checkins";
@@ -106,6 +107,53 @@ describe("dashboard display helpers", () => {
       "2026-07-08",
       "2026-07-09",
       "2026-07-10",
+    ]);
+  });
+
+  test("returns recent check-in activity in feed order", () => {
+    const records = [
+      { participant: "B" as const, dateCn: "2026-07-05", status: "done" as const },
+      { participant: "A" as const, dateCn: "2026-07-06", status: "rest" as const },
+      { participant: "B" as const, dateCn: "2026-07-06", status: "done" as const },
+      { participant: "A" as const, dateCn: "2026-07-04", status: "done" as const },
+    ];
+
+    expect(getRecentCheckinActivity(records, 3)).toEqual([
+      { participant: "A", dateCn: "2026-07-06", status: "rest" },
+      { participant: "B", dateCn: "2026-07-06", status: "done" },
+      { participant: "B", dateCn: "2026-07-05", status: "done" },
+    ]);
+  });
+
+  test("orders same-day activity by actual check-in time when available", () => {
+    const records = [
+      {
+        participant: "A" as const,
+        dateCn: "2026-07-06",
+        status: "done" as const,
+        createdAt: "2026-07-06T10:00:00.000Z",
+      },
+      {
+        participant: "B" as const,
+        dateCn: "2026-07-06",
+        status: "rest" as const,
+        createdAt: "2026-07-06T13:00:00.000Z",
+      },
+    ];
+
+    expect(getRecentCheckinActivity(records, 2)).toEqual([
+      {
+        participant: "B",
+        dateCn: "2026-07-06",
+        status: "rest",
+        createdAt: "2026-07-06T13:00:00.000Z",
+      },
+      {
+        participant: "A",
+        dateCn: "2026-07-06",
+        status: "done",
+        createdAt: "2026-07-06T10:00:00.000Z",
+      },
     ]);
   });
 });

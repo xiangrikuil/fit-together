@@ -20,6 +20,10 @@ import {
 import { checkinPanelClassName } from "@/components/checkins/status-styles";
 import { DurationStepperControl } from "@/components/checkins/duration-stepper-control";
 import { normalizeDurationMinutes } from "@/features/checkins/duration-stepper";
+import {
+  CheckinMediaDraft,
+  CheckinMediaPicker,
+} from "@/components/checkins/checkin-media-picker";
 
 type TodayCheckinFormProps = {
   roomId: string;
@@ -46,6 +50,9 @@ export const TodayCheckinForm = ({
     normalizeDurationMinutes(record?.durationMinutes),
   );
   const [note, setNote] = useState(record?.note ?? "");
+  const [media, setMedia] = useState<CheckinMediaDraft[]>(
+    () => record?.media.map(toMediaDraft) ?? [],
+  );
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -76,6 +83,7 @@ export const TodayCheckinForm = ({
             workoutType: status === "done" ? workoutType : null,
             durationMinutes: status === "done" ? durationMinutes : null,
             note,
+            media,
           }),
         },
       );
@@ -176,6 +184,14 @@ export const TodayCheckinForm = ({
           />
         </div>
 
+        <CheckinMediaPicker
+          roomId={roomId}
+          participant={selectedParticipant}
+          value={media}
+          disabled={!selectedParticipant || disabled}
+          onChange={setMedia}
+        />
+
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
         {message ? <p className="text-sm text-primary">{message}</p> : null}
 
@@ -187,3 +203,15 @@ export const TodayCheckinForm = ({
     </section>
   );
 };
+
+const toMediaDraft = ({
+  url,
+  pathname,
+  contentType,
+  byteSize,
+}: CheckinView["media"][number]): CheckinMediaDraft => ({
+  url,
+  pathname,
+  contentType,
+  byteSize,
+});

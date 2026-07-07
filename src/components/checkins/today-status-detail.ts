@@ -1,5 +1,6 @@
 import type { CalendarStatus } from "@/domain/checkins";
 import type { CheckinView } from "@/features/checkins/checkin-repository";
+import { formatCheckinClockTime } from "./checkin-time-labels";
 import { WORKOUT_TYPE_LABELS } from "./labels";
 
 type TodayStatusDetailInput = {
@@ -11,8 +12,10 @@ export const getTodayStatusDetail = ({
   status,
   record,
 }: TodayStatusDetailInput) => {
+  const clockTime = record ? formatCheckinClockTime(record.createdAt) : null;
+
   if (status === "rest") {
-    return "主动休息";
+    return clockTime ? `${clockTime} 主动休息` : "主动休息";
   }
 
   if (status !== "done") {
@@ -26,5 +29,9 @@ export const getTodayStatusDetail = ({
       : null,
   ].filter(Boolean);
 
-  return details.length > 0 ? details.join(" · ") : "已训练";
+  if (details.length > 0) {
+    return [clockTime, ...details].filter(Boolean).join(" · ");
+  }
+
+  return clockTime ? `${clockTime} 已训练` : "已训练";
 };

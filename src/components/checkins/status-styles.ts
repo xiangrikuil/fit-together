@@ -1,10 +1,10 @@
 import type { CalendarStatus } from "@/domain/checkins";
 
 export const checkinPanelClassName =
-  "rounded-lg border border-foreground/10 bg-card/85 p-4 shadow-[0_8px_24px_rgb(15_23_42_/_0.06)] backdrop-blur";
+  "min-w-0 rounded-lg border border-foreground/10 bg-card/85 p-4 shadow-[0_8px_24px_rgb(15_23_42_/_0.06)] backdrop-blur";
 
 export const checkinInsetClassName =
-  "rounded-lg border border-foreground/10 bg-background/65";
+  "min-w-0 rounded-lg border border-foreground/10 bg-background/65";
 
 export const statusDotClassName: Record<CalendarStatus, string> = {
   done: "bg-emerald-500",

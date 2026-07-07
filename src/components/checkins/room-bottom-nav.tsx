@@ -3,13 +3,14 @@
 import {
   CalendarCheck,
   ChartColumnBig,
+  Images,
   type LucideIcon,
   UserRound,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-export type RoomTab = "today" | "overview" | "me";
+export type RoomTab = "today" | "activity" | "overview" | "me";
 
 type RoomBottomNavProps = {
   activeTab: RoomTab;
@@ -22,6 +23,7 @@ const tabs: Array<{
   Icon: LucideIcon;
 }> = [
   { value: "today", label: "今日", Icon: CalendarCheck },
+  { value: "activity", label: "动态", Icon: Images },
   { value: "overview", label: "总览", Icon: ChartColumnBig },
   { value: "me", label: "我的", Icon: UserRound },
 ];
@@ -31,7 +33,7 @@ export const RoomBottomNav = ({
   onTabChange,
 }: RoomBottomNavProps) => (
   <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-foreground/10 bg-background/75 px-3 pt-2 pb-[max(env(safe-area-inset-bottom),0.75rem)] backdrop-blur-xl">
-    <div className="mx-auto grid h-16 max-w-md grid-cols-3 gap-1 rounded-lg border border-foreground/10 bg-card/85 p-1.5 shadow-[0_12px_32px_rgb(15_23_42_/_0.12)]">
+    <div className="mx-auto grid h-16 w-full max-w-[calc(100vw-1.5rem)] grid-cols-4 gap-1 rounded-lg border border-foreground/10 bg-card/85 p-1.5 shadow-[0_12px_32px_rgb(15_23_42_/_0.12)] sm:max-w-lg">
       {tabs.map(({ value, label, Icon }) => {
         const isActive = activeTab === value;
 

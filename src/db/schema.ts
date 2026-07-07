@@ -47,6 +47,34 @@ export const checkins = pgTable(
   ],
 );
 
+export const checkinMedia = pgTable(
+  "checkin_media",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    checkinId: uuid("checkin_id")
+      .notNull()
+      .references(() => checkins.id, { onDelete: "cascade" }),
+    roomId: text("room_id").notNull(),
+    participant: participantEnum("participant").notNull(),
+    dateCn: text("date_cn").notNull(),
+    url: text("url").notNull(),
+    pathname: text("pathname").notNull(),
+    contentType: text("content_type").notNull(),
+    byteSize: integer("byte_size").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("checkin_media_checkin_sort_idx").on(
+      table.checkinId,
+      table.sortOrder,
+    ),
+    index("checkin_media_room_date_idx").on(table.roomId, table.dateCn),
+  ],
+);
+
 export const roomMembers = pgTable(
   "room_members",
   {
@@ -73,5 +101,7 @@ export const roomMembers = pgTable(
 
 export type CheckinRow = typeof checkins.$inferSelect;
 export type NewCheckinRow = typeof checkins.$inferInsert;
+export type CheckinMediaRow = typeof checkinMedia.$inferSelect;
+export type NewCheckinMediaRow = typeof checkinMedia.$inferInsert;
 export type RoomMemberRow = typeof roomMembers.$inferSelect;
 export type NewRoomMemberRow = typeof roomMembers.$inferInsert;

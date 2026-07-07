@@ -1,6 +1,7 @@
 import type { MonthlyDashboard, Participant } from "@/domain/checkins";
 import type { MemberProfile } from "@/domain/members";
 import type { CheckinView } from "@/features/checkins/checkin-repository";
+import { CheckinActivityFeed } from "@/components/checkins/checkin-activity-feed";
 import { CurrentIdentityStrip } from "@/components/checkins/current-identity-strip";
 import { IdentitySwitcher } from "@/components/checkins/identity-switcher";
 import { MonthlyCalendar } from "@/components/checkins/monthly-calendar";
@@ -35,6 +36,12 @@ type OverviewRoomPanelProps = {
   profiles: Record<Participant, MemberProfile>;
 };
 
+type ActivityRoomPanelProps = {
+  today: string;
+  records: CheckinView[];
+  profiles: Record<Participant, MemberProfile>;
+};
+
 export const TodayRoomPanel = ({
   roomId,
   today,
@@ -47,7 +54,7 @@ export const TodayRoomPanel = ({
   onSelectParticipant,
   onSaved,
 }: TodayRoomPanelProps) => (
-  <section className="mx-auto w-full max-w-xl space-y-4">
+  <section className="mx-auto w-full min-w-0 max-w-xl space-y-4">
     <TodayStatusPanel
       dashboard={dashboard}
       today={today}
@@ -83,7 +90,7 @@ export const OverviewRoomPanel = ({
   nextMonth,
   profiles,
 }: OverviewRoomPanelProps) => (
-  <section className="space-y-4">
+  <section className="min-w-0 space-y-4">
     <MonthlySummary dashboard={dashboard} profiles={profiles} />
     <MonthlyCalendar
       dashboard={dashboard}
@@ -96,6 +103,14 @@ export const OverviewRoomPanel = ({
   </section>
 );
 
+export const ActivityRoomPanel = ({
+  today,
+  records,
+  profiles,
+}: ActivityRoomPanelProps) => (
+  <CheckinActivityFeed today={today} records={records} profiles={profiles} />
+);
+
 export const MeRoomPanel = ({
   roomId,
   profiles,
@@ -104,7 +119,7 @@ export const MeRoomPanel = ({
   onSelectParticipant,
   onProfileSaved,
 }: RoomPanelSharedProps) => (
-  <section className="mx-auto w-full max-w-xl space-y-4">
+  <section className="mx-auto w-full min-w-0 max-w-xl space-y-4">
     <IdentitySwitcher
       roomId={roomId}
       selected={selectedParticipant}
@@ -123,5 +138,5 @@ const todayRecordKey = (record: CheckinView | null) => {
 
   return `${record.status}-${record.workoutType ?? "none"}-${
     record.durationMinutes ?? "none"
-  }-${record.note}`;
+  }-${record.note}-${record.media.map((media) => media.url).join("|")}`;
 };

@@ -51,17 +51,17 @@ export const TodayStatusPanel = ({
 
   return (
     <section className={checkinPanelClassName}>
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div>
+      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="flex items-center gap-2 text-base font-semibold">
             <CheckCircle2 className="size-4 text-primary" />
             今日状态
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="break-words text-sm text-muted-foreground">
             中国时间 {today}，已记录 {recordedCount}/2
           </p>
         </div>
-        <div className="rounded-md bg-accent/80 px-2 py-1 text-xs font-medium text-accent-foreground">
+        <div className="shrink-0 rounded-md bg-accent/80 px-2 py-1 text-xs font-medium text-accent-foreground">
           00:00-24:00
         </div>
       </div>
@@ -127,6 +127,23 @@ const MemberTodayStatus = ({
         <Clock3 className="size-3" />
       </div>
       <p className="mt-2 truncate text-xs text-muted-foreground">{detail}</p>
+      {record?.media.length ? (
+        <div className="mt-2 grid grid-cols-3 gap-1">
+          {record.media.slice(0, 3).map((media, index) => (
+            <div
+              key={`${media.pathname}-${index}`}
+              className="aspect-square overflow-hidden rounded-sm bg-muted"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={media.url}
+                alt={`${profile.displayName} 今日打卡图 ${index + 1}`}
+                className="size-full object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 };

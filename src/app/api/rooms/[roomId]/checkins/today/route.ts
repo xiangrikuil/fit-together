@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 
 import { formatChinaDate } from "@/domain/checkins";
 import { isDatabaseConfigured } from "@/db/client";
+import { isAuthorizedRoomRequest } from "@/features/auth/room-request-auth";
 import { upsertTodayCheckin } from "@/features/checkins/checkin-repository";
 import {
   roomIdSchema,
@@ -13,6 +14,13 @@ export async function POST(
   request: Request,
   context: { params: Promise<{ roomId: string }> },
 ) {
+  if (!isAuthorizedRoomRequest(request, process.env)) {
+    return NextResponse.json(
+      { error: "Authentication required." },
+      { status: 401 },
+    );
+  }
+
   if (!isDatabaseConfigured()) {
     return NextResponse.json(
       { error: "DATABASE_URL is not configured." },
@@ -32,6 +40,7 @@ export async function POST(
       workoutType: payload.workoutType,
       durationMinutes: payload.durationMinutes,
       note: payload.note,
+      media: payload.media,
     });
 
     return NextResponse.json({ record });

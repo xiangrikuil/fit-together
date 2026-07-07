@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 
 import {
   addMonths,
@@ -11,6 +12,10 @@ import {
   CheckinView,
   getRoomMonthCheckins,
 } from "@/features/checkins/checkin-repository";
+import {
+  SHARED_PASSWORD_COOKIE_NAME,
+  isValidSharedPasswordSession,
+} from "@/features/auth/shared-password";
 import { getRoomMemberProfiles } from "@/features/members/member-repository";
 import {
   monthSchema,
@@ -34,6 +39,17 @@ export default async function RoomPage({
 
   if (!safeRoomId.success) {
     notFound();
+  }
+
+  const cookieStore = await cookies();
+
+  if (
+    !isValidSharedPasswordSession(
+      cookieStore.get(SHARED_PASSWORD_COOKIE_NAME)?.value,
+      process.env,
+    )
+  ) {
+    redirect(`/login?next=/room/${safeRoomId.data}`);
   }
 
   const today = formatChinaDate();

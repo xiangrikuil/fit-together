@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
 import { isDatabaseConfigured } from "@/db/client";
+import { isAuthorizedRoomRequest } from "@/features/auth/room-request-auth";
 import { upsertRoomMemberProfile } from "@/features/members/member-repository";
 import { upsertMemberProfileSchema } from "@/features/members/member-validation";
 import { roomIdSchema } from "@/features/checkins/checkin-validation";
@@ -10,6 +11,13 @@ export async function POST(
   request: Request,
   context: { params: Promise<{ roomId: string }> },
 ) {
+  if (!isAuthorizedRoomRequest(request, process.env)) {
+    return NextResponse.json(
+      { error: "Authentication required." },
+      { status: 401 },
+    );
+  }
+
   if (!isDatabaseConfigured()) {
     return NextResponse.json(
       { error: "DATABASE_URL is not configured." },

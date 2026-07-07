@@ -5,7 +5,18 @@ import {
   PARTICIPANTS,
   WORKOUT_TYPES,
 } from "../../domain/checkins";
+import {
+  CHECKIN_MEDIA_CONTENT_TYPES,
+  MAX_CHECKIN_MEDIA_BYTES,
+  MAX_CHECKIN_MEDIA_ITEMS,
+} from "./checkin-media-policy";
 import { DEFAULT_DURATION_MINUTES } from "./duration-stepper";
+
+export {
+  CHECKIN_MEDIA_CONTENT_TYPES,
+  MAX_CHECKIN_MEDIA_BYTES,
+  MAX_CHECKIN_MEDIA_ITEMS,
+} from "./checkin-media-policy";
 
 export const roomIdSchema = z
   .string()
@@ -21,6 +32,17 @@ export const monthSchema = z
     return monthNumber >= 1 && monthNumber <= 12;
   });
 
+export const checkinMediaUploadRequestSchema = z.object({
+  participant: z.enum(PARTICIPANTS),
+});
+
+export const savedCheckinMediaSchema = z.object({
+  url: z.string().url(),
+  pathname: z.string().min(1).max(512),
+  contentType: z.enum(CHECKIN_MEDIA_CONTENT_TYPES),
+  byteSize: z.number().int().min(1).max(MAX_CHECKIN_MEDIA_BYTES),
+});
+
 export const upsertCheckinSchema = z
   .object({
     participant: z.enum(PARTICIPANTS),
@@ -28,6 +50,11 @@ export const upsertCheckinSchema = z
     workoutType: z.enum(WORKOUT_TYPES).nullable().optional(),
     durationMinutes: z.number().int().min(0).max(1440).nullable().optional(),
     note: z.string().max(280).optional().default(""),
+    media: z
+      .array(savedCheckinMediaSchema)
+      .max(MAX_CHECKIN_MEDIA_ITEMS)
+      .optional()
+      .default([]),
   })
   .transform((input) => {
     if (input.status === "rest") {

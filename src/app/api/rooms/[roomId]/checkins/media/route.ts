@@ -2,13 +2,17 @@ import { put } from "@vercel/blob";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
+import { formatChinaDate } from "@/domain/checkins";
 import { isAuthorizedRoomRequest } from "@/features/auth/room-request-auth";
-import { roomIdSchema } from "@/features/checkins/checkin-validation";
+import {
+  CHECKIN_MEDIA_CONTENT_TYPES,
+  MAX_CHECKIN_MEDIA_BYTES,
+  checkinMediaUploadRequestSchema,
+  roomIdSchema,
+} from "@/features/checkins/checkin-validation";
 import { canUploadWithVercelBlob } from "@/features/members/blob-upload-config";
-import { avatarUploadRequestSchema } from "@/features/members/member-validation";
 
-const allowedAvatarTypes = ["image/jpeg", "image/png", "image/webp"];
-const maxAvatarBytes = 2 * 1024 * 1024;
+const allowedCheckinMediaTypes: string[] = [...CHECKIN_MEDIA_CONTENT_TYPES];
 
 export async function POST(
   request: Request,
@@ -37,49 +41,55 @@ export async function POST(
 
     if (!(file instanceof File)) {
       return NextResponse.json(
-        { error: "Avatar file is required." },
+        { error: "Check-in photo is required." },
         { status: 400 },
       );
     }
 
-    const payload = avatarUploadRequestSchema.parse({ participant });
+    const payload = checkinMediaUploadRequestSchema.parse({ participant });
 
-    if (!allowedAvatarTypes.includes(file.type)) {
+    if (!allowedCheckinMediaTypes.includes(file.type)) {
       return NextResponse.json(
-        { error: "Only JPG, PNG, and WebP avatars are allowed." },
+        { error: "仅支持 JPG、PNG、WebP 图片。HEIC 图片请先转成 JPG。" },
         { status: 400 },
       );
     }
 
-    if (file.size > maxAvatarBytes) {
+    if (file.size > MAX_CHECKIN_MEDIA_BYTES) {
       return NextResponse.json(
-        { error: "Avatar must be 2MB or smaller." },
+        { error: "单张图片不能超过 4MB。" },
         { status: 400 },
       );
     }
 
-    const extension = getExtension(file);
     const blob = await put(
-      `rooms/${safeRoomId}/${payload.participant}/avatar-${Date.now()}${extension}`,
+      `rooms/${safeRoomId}/${payload.participant}/checkins/${formatChinaDate()}-${Date.now()}${getExtension(file)}`,
       file,
       {
         access: "public",
         addRandomSuffix: true,
-        maximumSizeInBytes: maxAvatarBytes,
+        maximumSizeInBytes: MAX_CHECKIN_MEDIA_BYTES,
       },
     );
 
-    return NextResponse.json({ url: blob.url });
+    return NextResponse.json({
+      media: {
+        url: blob.url,
+        pathname: blob.pathname,
+        contentType: blob.contentType,
+        byteSize: file.size,
+      },
+    });
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(
-        { error: "Invalid avatar upload.", issues: error.issues },
+        { error: "Invalid check-in photo upload.", issues: error.issues },
         { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: "Unable to upload avatar." },
+      { error: "Unable to upload check-in photo." },
       { status: 500 },
     );
   }
